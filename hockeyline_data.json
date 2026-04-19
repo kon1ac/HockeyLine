@@ -1,0 +1,442 @@
+{
+  "meta": {
+    "updatedAt": "2026-04-19T12:00:00.000",
+    "description": "Стартовые данные для HockeyLine (asset → копия в sandbox; дальше приложение перезаписывает файл при изменениях)"
+  },
+  "users": [
+    {
+      "id": "user-admin-1",
+      "email": "isip_i.v.egorov@mpt.ru",
+      "password": "Testuser1",
+      "role": "admin",
+      "fullName": "Администратор"
+    },
+    {
+      "id": "user-coach-1",
+      "email": "ilyadobrovolskiy00@gmail.com",
+      "password": "Testuser2",
+      "role": "coach",
+      "fullName": "Илья Добровольский"
+    }
+  ],
+  "players": [
+    {
+      "id": "player-gk-1",
+      "firstName": "Артём",
+      "lastName": "Соколов",
+      "birthDate": "2002-03-11T00:00:00.000",
+      "position": "goalkeeper",
+      "number": 1,
+      "height": 188,
+      "weight": 84,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": true,
+      "statistics": {
+        "games": 24,
+        "goals": 0,
+        "assists": 2,
+        "penaltyMinutes": 0,
+        "plusMinus": 0
+      }
+    },
+    {
+      "id": "player-gk-2",
+      "firstName": "Матвей",
+      "lastName": "Козлов",
+      "birthDate": "2003-07-22T00:00:00.000",
+      "position": "goalkeeper",
+      "number": 30,
+      "height": 185,
+      "weight": 82,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 8,
+        "goals": 0,
+        "assists": 0,
+        "penaltyMinutes": 2,
+        "plusMinus": 0
+      }
+    },
+    {
+      "id": "player-def-1",
+      "firstName": "Илья",
+      "lastName": "Морозов",
+      "birthDate": "2001-11-05T00:00:00.000",
+      "position": "defender",
+      "number": 2,
+      "height": 186,
+      "weight": 88,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": true,
+      "statistics": {
+        "games": 26,
+        "goals": 4,
+        "assists": 14,
+        "penaltyMinutes": 18,
+        "plusMinus": 12
+      }
+    },
+    {
+      "id": "player-def-2",
+      "firstName": "Дмитрий",
+      "lastName": "Волков",
+      "birthDate": "2002-01-18T00:00:00.000",
+      "position": "defender",
+      "number": 7,
+      "height": 184,
+      "weight": 86,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 25,
+        "goals": 2,
+        "assists": 9,
+        "penaltyMinutes": 24,
+        "plusMinus": 8
+      }
+    },
+    {
+      "id": "player-def-3",
+      "firstName": "Кирилл",
+      "lastName": "Новиков",
+      "birthDate": "2001-09-30T00:00:00.000",
+      "position": "defender",
+      "number": 44,
+      "height": 190,
+      "weight": 92,
+      "photoUrl": null,
+      "status": "injured",
+      "inRoster": false,
+      "isFavorite": false,
+      "statistics": {
+        "games": 12,
+        "goals": 1,
+        "assists": 3,
+        "penaltyMinutes": 6,
+        "plusMinus": 1
+      }
+    },
+    {
+      "id": "player-def-4",
+      "firstName": "Семён",
+      "lastName": "Лебедев",
+      "birthDate": "2003-04-14T00:00:00.000",
+      "position": "defender",
+      "number": 55,
+      "height": 183,
+      "weight": 85,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 20,
+        "goals": 3,
+        "assists": 7,
+        "penaltyMinutes": 10,
+        "plusMinus": 5
+      }
+    },
+    {
+      "id": "player-def-5",
+      "firstName": "Никита",
+      "lastName": "Орлов",
+      "birthDate": "2002-12-01T00:00:00.000",
+      "position": "defender",
+      "number": 27,
+      "height": 187,
+      "weight": 89,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 22,
+        "goals": 2,
+        "assists": 6,
+        "penaltyMinutes": 14,
+        "plusMinus": 4
+      }
+    },
+    {
+      "id": "player-def-6",
+      "firstName": "Егор",
+      "lastName": "Смирнов",
+      "birthDate": "2003-02-28T00:00:00.000",
+      "position": "defender",
+      "number": 91,
+      "height": 182,
+      "weight": 83,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 18,
+        "goals": 0,
+        "assists": 4,
+        "penaltyMinutes": 8,
+        "plusMinus": 2
+      }
+    },
+    {
+      "id": "player-fwd-1",
+      "firstName": "Александр",
+      "lastName": "Петров",
+      "birthDate": "2001-06-09T00:00:00.000",
+      "position": "forward",
+      "number": 10,
+      "height": 181,
+      "weight": 79,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": true,
+      "statistics": {
+        "games": 26,
+        "goals": 19,
+        "assists": 15,
+        "penaltyMinutes": 4,
+        "plusMinus": 14
+      }
+    },
+    {
+      "id": "player-fwd-2",
+      "firstName": "Максим",
+      "lastName": "Иванов",
+      "birthDate": "2002-08-17T00:00:00.000",
+      "position": "forward",
+      "number": 17,
+      "height": 179,
+      "weight": 77,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 26,
+        "goals": 14,
+        "assists": 18,
+        "penaltyMinutes": 6,
+        "plusMinus": 11
+      }
+    },
+    {
+      "id": "player-fwd-3",
+      "firstName": "Владислав",
+      "lastName": "Кузнецов",
+      "birthDate": "2001-04-25T00:00:00.000",
+      "position": "forward",
+      "number": 9,
+      "height": 180,
+      "weight": 78,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 24,
+        "goals": 11,
+        "assists": 10,
+        "penaltyMinutes": 12,
+        "plusMinus": 7
+      }
+    },
+    {
+      "id": "player-fwd-4",
+      "firstName": "Роман",
+      "lastName": "Попов",
+      "birthDate": "2003-01-12T00:00:00.000",
+      "position": "forward",
+      "number": 23,
+      "height": 178,
+      "weight": 76,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 21,
+        "goals": 8,
+        "assists": 7,
+        "penaltyMinutes": 16,
+        "plusMinus": 3
+      }
+    },
+    {
+      "id": "player-fwd-5",
+      "firstName": "Тимофей",
+      "lastName": "Семёнов",
+      "birthDate": "2002-10-03T00:00:00.000",
+      "position": "forward",
+      "number": 11,
+      "height": 177,
+      "weight": 75,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 23,
+        "goals": 9,
+        "assists": 11,
+        "penaltyMinutes": 8,
+        "plusMinus": 6
+      }
+    },
+    {
+      "id": "player-fwd-6",
+      "firstName": "Иван",
+      "lastName": "Фёдоров",
+      "birthDate": "2001-12-20T00:00:00.000",
+      "position": "forward",
+      "number": 88,
+      "height": 183,
+      "weight": 81,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 25,
+        "goals": 12,
+        "assists": 8,
+        "penaltyMinutes": 20,
+        "plusMinus": 5
+      }
+    },
+    {
+      "id": "player-fwd-7",
+      "firstName": "Павел",
+      "lastName": "Зайцев",
+      "birthDate": "2003-05-08T00:00:00.000",
+      "position": "forward",
+      "number": 71,
+      "height": 176,
+      "weight": 74,
+      "photoUrl": null,
+      "status": "injured",
+      "inRoster": false,
+      "isFavorite": false,
+      "statistics": {
+        "games": 10,
+        "goals": 3,
+        "assists": 2,
+        "penaltyMinutes": 4,
+        "plusMinus": -1
+      }
+    },
+    {
+      "id": "player-fwd-8",
+      "firstName": "Андрей",
+      "lastName": "Белов",
+      "birthDate": "2002-02-14T00:00:00.000",
+      "position": "forward",
+      "number": 19,
+      "height": 182,
+      "weight": 80,
+      "photoUrl": null,
+      "status": "active",
+      "inRoster": true,
+      "isFavorite": false,
+      "statistics": {
+        "games": 19,
+        "goals": 6,
+        "assists": 5,
+        "penaltyMinutes": 6,
+        "plusMinus": 2
+      }
+    }
+  ],
+  "lines": [
+    {
+      "id": "goalkeeper-1",
+      "lineNumber": 1,
+      "type": "goalkeeper",
+      "playerIds": ["player-gk-1"]
+    },
+    {
+      "id": "goalkeeper-2",
+      "lineNumber": 2,
+      "type": "goalkeeper",
+      "playerIds": ["player-gk-2"]
+    },
+    {
+      "id": "forward-1",
+      "lineNumber": 1,
+      "type": "forward",
+      "playerIds": ["player-fwd-1", "player-fwd-2", "player-fwd-3"]
+    },
+    {
+      "id": "forward-2",
+      "lineNumber": 2,
+      "type": "forward",
+      "playerIds": ["player-fwd-4", "player-fwd-5", "player-fwd-6"]
+    },
+    {
+      "id": "forward-3",
+      "lineNumber": 3,
+      "type": "forward",
+      "playerIds": ["player-fwd-8"]
+    },
+    {
+      "id": "forward-4",
+      "lineNumber": 4,
+      "type": "forward",
+      "playerIds": []
+    },
+    {
+      "id": "defense-1",
+      "lineNumber": 1,
+      "type": "defense",
+      "playerIds": ["player-def-1", "player-def-2"]
+    },
+    {
+      "id": "defense-2",
+      "lineNumber": 2,
+      "type": "defense",
+      "playerIds": ["player-def-4", "player-def-5"]
+    },
+    {
+      "id": "defense-3",
+      "lineNumber": 3,
+      "type": "defense",
+      "playerIds": ["player-def-6"]
+    }
+  ],
+  "notes": [
+    {
+      "id": "note-1",
+      "playerId": "player-fwd-1",
+      "authorId": "user-coach-1",
+      "text": "Сильная игра в большинстве, держать кисть выше при броске с круга.",
+      "createdAt": "2026-04-10T18:30:00.000",
+      "updatedAt": "2026-04-10T18:30:00.000"
+    },
+    {
+      "id": "note-2",
+      "playerId": "player-def-1",
+      "authorId": "user-coach-1",
+      "text": "Лидер защиты, назначен капитом на выездную серию.",
+      "createdAt": "2026-04-12T09:15:00.000",
+      "updatedAt": "2026-04-12T09:15:00.000"
+    },
+    {
+      "id": "note-3",
+      "playerId": "player-gk-1",
+      "authorId": "user-coach-1",
+      "text": "Отработать выходы 1 на 1 на утренней тренировке.",
+      "createdAt": "2026-04-15T07:45:00.000",
+      "updatedAt": "2026-04-15T07:45:00.000"
+    }
+  ]
+}
