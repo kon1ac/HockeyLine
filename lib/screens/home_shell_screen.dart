@@ -975,13 +975,15 @@ class _ProfilePage extends StatelessWidget {
             style: AppTextStyles.bodySmallMuted(context),
           ),
           const SizedBox(height: AppSpacing.s24),
-          ElevatedButton(
-            onPressed: () async {
-              await auth.deleteCurrentAccount();
-            },
-            child: const Text('Удалить аккаунт'),
-          ),
-          const SizedBox(height: AppSpacing.s8),
+          if (!auth.isSystemAdmin(auth.currentUser?.id ?? '')) ...<Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                await auth.deleteCurrentAccount();
+              },
+              child: const Text('Удалить аккаунт'),
+            ),
+            const SizedBox(height: AppSpacing.s8),
+          ],
           ElevatedButton(
             onPressed: () async {
               await context.read<AuthProvider>().signOut();
@@ -989,7 +991,7 @@ class _ProfilePage extends StatelessWidget {
             child: const Text('Выйти из аккаунта'),
           ),
           const SizedBox(height: AppSpacing.s8),
-          if (auth.isAdmin) ...<Widget>[
+          if (!auth.isGuest) ...<Widget>[
             OutlinedButton.icon(
               onPressed: () async {
                 final String path = await context.read<TeamProvider>().exportFullAppDataJson();
@@ -1045,7 +1047,12 @@ class _ProfilePage extends StatelessWidget {
                     ? utf8.decode(file.bytes!, allowMalformed: false)
                     : (file.path != null ? await File(file.path!).readAsString() : null);
                 if (content == null || content.isEmpty) {
-                  showAppSnackBar(context, 'Не удалось прочитать файл', error: true);
+                  showAppDialog(
+                    context: context,
+                    title: 'Ошибка импорта',
+                    message: 'Не удалось прочитать файл',
+                    isError: true,
+                  );
                   return;
                 }
                 final TeamProvider team = context.read<TeamProvider>();
@@ -1055,7 +1062,12 @@ class _ProfilePage extends StatelessWidget {
                   return;
                 }
                 if (importError != null) {
-                  showAppSnackBar(context, importError, error: true);
+                  showAppDialog(
+                    context: context,
+                    title: 'Ошибка импорта',
+                    message: importError,
+                    isError: true,
+                  );
                   return;
                 }
                 authProvider.invalidateSystemAccountsCache();
@@ -1579,7 +1591,12 @@ Future<void> _openPlayerForm(BuildContext context, {Player? existing}) async {
                   return;
                 }
                 if (error != null) {
-                  showAppSnackBar(context, error, error: true);
+                  showAppDialog(
+                    context: context,
+                    title: 'Ошибка валидации',
+                    message: error,
+                    isError: true,
+                  );
                   return;
                 }
                 Navigator.of(context).pop();
@@ -1853,54 +1870,35 @@ class _UsersAdminPanel extends StatelessWidget {
               child: ListTile(
                 title: Text(user.email, style: AppTextStyles.bodyEmphasis(context)),
                 subtitle: Text(user.role.name, style: AppTextStyles.bodySmallMuted(context)),
-                trailing: Wrap(
-                  spacing: AppSpacing.s8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: <Widget>[
-                    DropdownButton<UserRole>(
-                      value: user.role,
-                      items: UserRole.values
-                          .map(
-                            (UserRole role) => DropdownMenuItem<UserRole>(
-                              value: role,
-                              child: Text(role.name),
-                            ),
-                          )
-                          .toList(growable: false),
-                      onChanged: (UserRole? value) async {
-                        if (value == null) {
-                          return;
-                        }
-                        final String? error = await context.read<AuthProvider>().updateUserRole(
-                          userId: user.id,
-                          role: value,
-                        );
-                        if (context.mounted && error != null) {
-                          showAppSnackBar(context, error, error: true);
-                        }
-                      },
-                    ),
-                    IconButton(
-                      style: IconButton.styleFrom(
-                        minimumSize: const Size(48, 48),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      onPressed: () async {
-                        final String? error = await context.read<AuthProvider>().deleteUserById(
-                          user.id,
-                        );
-                        if (context.mounted) {
-                          if (error != null) {
-                            showAppSnackBar(context, error, error: true);
-                          } else {
-                            showAppSnackBar(context, 'Пользователь удалён', success: true);
+                trailing: auth.isSystemAdmin(user.id)
+                    ? Chip(
+                        label: const Text('Системный администратор'),
+                        avatar: const Icon(Icons.shield, size: 18),
+                      )
+                    : IconButton(
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () async {
+                          final String? error = await context.read<AuthProvider>().deleteUserById(
+                            user.id,
+                          );
+                          if (context.mounted) {
+                            if (error != null) {
+                              showAppDialog(
+                                context: context,
+                                title: 'Ошибка удаления',
+                                message: error,
+                                isError: true,
+                              );
+                            } else {
+                              showAppSnackBar(context, 'Пользователь удалён', success: true);
+                            }
                           }
-                        }
-                      },
-                      icon: const Icon(Icons.delete_outline),
-                    ),
-                  ],
-                ),
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                      ),
               ),
             );
           }).toList(growable: false),

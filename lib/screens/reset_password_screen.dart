@@ -38,7 +38,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
     if (error != null) {
-      showAppSnackBar(context, error, error: true);
+      showAppDialog(
+        context: context,
+        title: 'Ошибка сброса пароля',
+        message: error,
+        isError: true,
+      );
       return;
     }
     showAppSnackBar(context, 'Пароль успешно обновлён', success: true);

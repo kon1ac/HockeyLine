@@ -48,7 +48,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
       if (error != null) {
-        showAppSnackBar(context, error, error: true);
+        showAppDialog(
+          context: context,
+          title: 'Ошибка регистрации',
+          message: error,
+          isError: true,
+        );
         return;
       }
       showAppSnackBar(context, 'Регистрация успешна', success: true);
@@ -57,7 +62,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) {
         return;
       }
-      showAppSnackBar(context, 'Ошибка регистрации: $error', error: true);
+      showAppDialog(
+        context: context,
+        title: 'Ошибка регистрации',
+        message: 'Ошибка регистрации: $error',
+        isError: true,
+      );
     }
   }
 

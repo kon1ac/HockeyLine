@@ -38,6 +38,13 @@ class AuthProvider extends ChangeNotifier {
     _systemAccountsEnsured = false;
   }
 
+  static const String systemAdminEmail = 'isip_i.v.egorov@mpt.ru';
+  static const String systemAdminId = 'system-admin-1';
+
+  bool isSystemAdmin(String userId) {
+    return userId == systemAdminId;
+  }
+
   Future<void> ensureSystemAccounts() async {
     if (_systemAccountsEnsured) {
       return;
@@ -46,13 +53,13 @@ class AuthProvider extends ChangeNotifier {
     final List<User> users = List<User>.from(appData.users);
 
     final int adminIndex = users.indexWhere(
-      (User user) => user.email.toLowerCase() == 'isip_i.v.egorov@mpt.ru',
+      (User user) => user.email.toLowerCase() == systemAdminEmail,
     );
     if (adminIndex == -1) {
       users.add(
         const User(
-          id: 'system-admin-1',
-          email: 'isip_i.v.egorov@mpt.ru',
+          id: systemAdminId,
+          email: systemAdminEmail,
           password: 'Testuser1',
           role: UserRole.admin,
           fullName: 'System Admin',
@@ -352,36 +359,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> updateUserRole({
-    required String userId,
-    required UserRole role,
-  }) async {
-    final AppData appData = await _storageService.loadAppData();
-    final int index = appData.users.indexWhere((User user) => user.id == userId);
-    if (index == -1) {
-      return 'Пользователь не найден';
-    }
-    final List<User> users = List<User>.from(appData.users);
-    users[index] = users[index].copyWith(role: role);
-    await _storageService.saveAppData(
-      AppData(
-        users: users,
-        players: appData.players,
-        lines: appData.lines,
-        notes: appData.notes,
-      ),
-    );
-    if (_currentUser?.id == userId) {
-      _currentUser = _currentUser?.copyWith(role: role);
-      notifyListeners();
-    }
-    return null;
-  }
-
   Future<String?> deleteUserById(String userId) async {
     final User? currentUser = _currentUser;
     if (currentUser == null || !isAdmin) {
       return 'Недостаточно прав';
+    }
+    if (isSystemAdmin(userId)) {
+      return 'Нельзя удалить системного администратора';
     }
     if (currentUser.id == userId) {
       return 'Нельзя удалить текущего администратора';

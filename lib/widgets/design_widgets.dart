@@ -142,6 +142,39 @@ void showAppSnackBar(
       content: Text(message),
       backgroundColor: backgroundColor,
       behavior: SnackBarBehavior.floating,
+      elevation: 8,
+      margin: const EdgeInsets.all(16),
+    ),
+  );
+}
+
+void showAppDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  bool isError = false,
+}) {
+  showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext ctx) => AlertDialog(
+      title: Row(
+        children: <Widget>[
+          if (isError)
+            const Icon(Icons.error_outline, color: AppColors.accent, size: 24)
+          else
+            const Icon(Icons.info_outline, color: AppColors.chartCool, size: 24),
+          const SizedBox(width: 12),
+          Expanded(child: Text(title)),
+        ],
+      ),
+      content: Text(message),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('OK'),
+        ),
+      ],
     ),
   );
 }

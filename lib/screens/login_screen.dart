@@ -36,7 +36,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted || error == null) {
       return;
     }
-    showAppSnackBar(context, error, error: true);
+    showAppDialog(
+      context: context,
+      title: 'Ошибка входа',
+      message: error,
+      isError: true,
+    );
   }
 
   @override
