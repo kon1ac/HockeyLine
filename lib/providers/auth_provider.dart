@@ -359,6 +359,35 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<String?> updateUserRole({
+    required String userId,
+    required UserRole role,
+  }) async {
+    if (isSystemAdmin(userId)) {
+      return 'Нельзя изменить роль системного администратора';
+    }
+    final AppData appData = await _storageService.loadAppData();
+    final int index = appData.users.indexWhere((User user) => user.id == userId);
+    if (index == -1) {
+      return 'Пользователь не найден';
+    }
+    final List<User> users = List<User>.from(appData.users);
+    users[index] = users[index].copyWith(role: role);
+    await _storageService.saveAppData(
+      AppData(
+        users: users,
+        players: appData.players,
+        lines: appData.lines,
+        notes: appData.notes,
+      ),
+    );
+    if (_currentUser?.id == userId) {
+      _currentUser = _currentUser?.copyWith(role: role);
+      notifyListeners();
+    }
+    return null;
+  }
+
   Future<String?> deleteUserById(String userId) async {
     final User? currentUser = _currentUser;
     if (currentUser == null || !isAdmin) {

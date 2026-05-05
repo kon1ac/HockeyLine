@@ -1875,29 +1875,63 @@ class _UsersAdminPanel extends StatelessWidget {
                         label: const Text('Системный администратор'),
                         avatar: const Icon(Icons.shield, size: 18),
                       )
-                    : IconButton(
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(48, 48),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () async {
-                          final String? error = await context.read<AuthProvider>().deleteUserById(
-                            user.id,
-                          );
-                          if (context.mounted) {
-                            if (error != null) {
-                              showAppDialog(
-                                context: context,
-                                title: 'Ошибка удаления',
-                                message: error,
-                                isError: true,
+                    : Wrap(
+                        spacing: AppSpacing.s8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          DropdownButton<UserRole>(
+                            value: user.role,
+                            items: UserRole.values
+                                .map(
+                                  (UserRole role) => DropdownMenuItem<UserRole>(
+                                    value: role,
+                                    child: Text(role.name),
+                                  ),
+                                )
+                                .toList(growable: false),
+                            onChanged: (UserRole? value) async {
+                              if (value == null) {
+                                return;
+                              }
+                              final String? error = await context.read<AuthProvider>().updateUserRole(
+                                userId: user.id,
+                                role: value,
                               );
-                            } else {
-                              showAppSnackBar(context, 'Пользователь удалён', success: true);
-                            }
-                          }
-                        },
-                        icon: const Icon(Icons.delete_outline),
+                              if (context.mounted && error != null) {
+                                showAppDialog(
+                                  context: context,
+                                  title: 'Ошибка изменения роли',
+                                  message: error,
+                                  isError: true,
+                                );
+                              }
+                            },
+                          ),
+                          IconButton(
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () async {
+                              final String? error = await context.read<AuthProvider>().deleteUserById(
+                                user.id,
+                              );
+                              if (context.mounted) {
+                                if (error != null) {
+                                  showAppDialog(
+                                    context: context,
+                                    title: 'Ошибка удаления',
+                                    message: error,
+                                    isError: true,
+                                  );
+                                } else {
+                                  showAppSnackBar(context, 'Пользователь удалён', success: true);
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.delete_outline),
+                          ),
+                        ],
                       ),
               ),
             );
