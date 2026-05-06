@@ -1,0 +1,262 @@
+@startuml HockeyLineClassDiagram
+!theme cerulean-outline
+
+' Принудительно устанавливаем белый фон
+skinparam backgroundColor white
+skinparam class {
+  BackgroundColor #F5F5F5
+  BorderColor #D32F2F
+  FontColor #1A1A1A
+}
+skinparam stereotype {
+  FontColor #616161
+}
+
+' ========== МОДЕЛИ (Models) ==========
+
+class AppData <<model>> {
+  + List~User~ users
+  + List~Player~ players
+  + List~Line~ lines
+  + List~Note~ notes
+  + {static} fromJson(Map)
+  + toJson()
+}
+
+enum UserRole {
+  coach
+  admin
+  guest
+}
+
+enum PlayerPosition {
+  goalkeeper
+  defender
+  forward
+}
+
+enum PlayerStatus {
+  active
+  injured
+}
+
+enum LineType {
+  forward
+  defense
+  goalkeeper
+}
+
+enum PlayerSortType {
+  nameAsc
+  nameDesc
+  ageAsc
+  ageDesc
+}
+
+class User <<model>> {
+  + String id
+  + String email
+  + String password
+  + UserRole role
+  + String? fullName
+  + copyWith()
+  + toJson()
+  + fromJson()
+}
+
+class Player <<model>> {
+  + String id
+  + String firstName
+  + String lastName
+  + DateTime birthDate
+  + PlayerPosition position
+  + int number
+  + int? height
+  + int? weight
+  + String? photoUrl
+  + PlayerStatus status
+  + bool inRoster
+  + bool isFavorite
+  + Statistics statistics
+  + int get age
+  + String get fullName
+  + copyWith()
+  + toJson()
+  + fromJson()
+}
+
+class Statistics <<model>> {
+  + int games
+  + int goals
+  + int assists
+  + int penaltyMinutes
+  + int plusMinus
+  + int get points
+  + copyWith()
+  + toJson()
+  + fromJson()
+}
+
+class Line <<model>> {
+  + String id
+  + int lineNumber
+  + LineType type
+  + List~String~ playerIds
+  + copyWith()
+  + toJson()
+  + fromJson()
+}
+
+class Note <<model>> {
+  + String id
+  + String playerId
+  + String authorId
+  + String text
+  + DateTime createdAt
+  + DateTime updatedAt
+  + copyWith()
+  + toJson()
+  + fromJson()
+}
+
+' ========== ПРОВАЙДЕРЫ (Providers) ==========
+
+class AuthProvider <<provider>> {
+  - StorageService _storageService
+  - User? _currentUser
+  - bool _isLoading
+  - bool _bootstrapDone
+  + User? get currentUser
+  + bool get isAuthorized
+  + bool get isAdmin
+  + Future~void~ bootstrapInitialSession()
+  + Future~String?~ signIn(email, password)
+  + Future~String?~ register(email, password, confirm, fullName)
+  + Future~void~ signOut()
+  + Future~void~ signInAsGuest()
+  + Future~void~ deleteCurrentAccount()
+  + Future~String?~ updateUserRole(userId, role)
+  + Future~String?~ deleteUserById(userId)
+}
+
+class TeamProvider <<provider>> {
+  - StorageService _storageService
+  - List~Player~ _players
+  - List~Note~ _notes
+  - String _searchQuery
+  - PlayerPosition? _positionFilter
+  - bool _isLoading
+  + List~Player~ get players
+  + List~Player~ get favoritePlayers
+  + List~Player~ get rosterPlayers
+  + Future~void~ loadPlayers()
+  + Future~void~ toggleFavorite(playerId)
+  + Future~String?~ addPlayer(player)
+  + Future~String?~ updatePlayer(player)
+  + Future~void~ deletePlayer(playerId)
+  + Future~void~ toggleRoster(playerId, inRoster)
+  + Future~String?~ addNote(playerId, authorId, text)
+  + Future~String?~ updateNote(noteId, text, userId, canEditAny)
+  + Future~String?~ deleteNote(noteId, userId, canDeleteAny)
+  + Future~void~ incrementStats(playerId, goals, assists, penalties, games, plusMinus)
+  + Player? playerById(playerId)
+}
+
+class LinesProvider <<provider>> {
+  - StorageService _storageService
+  - List~Line~ _lines
+  + List~Line~ get lines
+  + Future~void~ loadLines()
+  + Future~void~ movePlayer(playerId, targetLineId, playerPosition)
+  + Future~void~ removePlayerFromLine(playerId, lineId)
+  + Future~void~ clearAllLines()
+  + Future~void~ saveLines()
+  + bool isPositionAllowedForLine(playerPosition, lineType)
+  + int lineCapacity(lineType)
+}
+
+class StatsProvider <<provider>> {
+  - StorageService _storageService
+  + Future~String~ exportStatsAsCsv(players)
+  + Future~String~ exportStatsAsPdf(players)
+}
+
+' ========== СЕРВИСЫ (Services) ==========
+
+class StorageService <<service>> {
+  - File? _dataFile
+  - bool _usePrefsStorage
+  + Future~void~ initDataFile()
+  + Future~Map~ loadData()
+  + Future~void~ saveData(data)
+  + Future~AppData~ loadAppData()
+  + Future~void~ saveAppData(data)
+  + Future~String~ exportJson()
+  + Future~String?~ importFullBackupJson(utf8Text)
+  + Future~Directory~ getExportDirectory()
+}
+
+' ========== УТИЛИТЫ ==========
+
+class Validators <<utility>> {
+  + {static} String? validateEmail(value)
+  + {static} String? validatePassword(value)
+  + {static} String? validateName(value, field)
+  + {static} String? validateNumber(value)
+  + {static} String? validateBirthDate(value)
+}
+
+' ========== ЭКРАНЫ ==========
+
+class HomeShellScreen <<screen>> {
+  + Widget build()
+}
+
+class LoginScreen <<screen>> {
+  + Widget build()
+}
+
+class RegisterScreen <<screen>> {
+  + Widget build()
+}
+
+class ResetPasswordScreen <<screen>> {
+  + Widget build()
+}
+
+' ========== СВЯЗИ (Relationships) ==========
+
+' AppData содержит модели
+AppData *-- User
+AppData *-- Player
+AppData *-- Line
+AppData *-- Note
+
+' Связи моделей
+Player *-- Statistics : has
+Note --> Player : references
+Note --> User : authored by
+
+' Провайдеры используют StorageService
+AuthProvider --> StorageService
+TeamProvider --> StorageService
+LinesProvider --> StorageService
+StatsProvider --> StorageService
+
+' Провайдеры используют модели
+AuthProvider --> User
+TeamProvider --> Player
+TeamProvider --> Note
+TeamProvider --> Validators
+LinesProvider --> Line
+
+' UI использует провайдеры
+HomeShellScreen --> AuthProvider
+HomeShellScreen --> TeamProvider
+HomeShellScreen --> LinesProvider
+HomeShellScreen --> StatsProvider
+LoginScreen --> AuthProvider
+RegisterScreen --> AuthProvider
+ResetPasswordScreen --> AuthProvider
+
+@enduml
