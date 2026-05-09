@@ -524,171 +524,171 @@ class _LinesPage extends StatelessWidget {
                   style: AppTextStyles.bodySmallMuted(context),
                 ),
                 const SizedBox(height: AppSpacing.s12),
-          Wrap(
-            spacing: AppSpacing.s8,
-            runSpacing: AppSpacing.s8,
-            children: roster
-                .map(
-                  (Player player) => isGuest
-                      ? Chip(
-                          label: Text(
-                            '${player.fullName} (${_shortPosition(player.position)})',
-                          ),
-                        )
-                      : Draggable<String>(
-                          data: player.id,
-                          feedback: Material(
-                            child: Chip(
-                              label: Text(
-                                '${player.fullName} (${_shortPosition(player.position)})',
+                Wrap(
+                  spacing: AppSpacing.s8,
+                  runSpacing: AppSpacing.s8,
+                  children: roster
+                      .map(
+                        (Player player) => isGuest
+                            ? Chip(
+                                label: Text(
+                                  '${player.fullName} (${_shortPosition(player.position)})',
+                                ),
+                              )
+                            : Draggable<String>(
+                                data: player.id,
+                                feedback: Material(
+                                  child: Chip(
+                                    label: Text(
+                                      '${player.fullName} (${_shortPosition(player.position)})',
+                                    ),
+                                  ),
+                                ),
+                                child: Chip(
+                                  label: Text(
+                                    '${player.fullName} (${_shortPosition(player.position)})',
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          child: Chip(
-                            label: Text(
-                              '${player.fullName} (${_shortPosition(player.position)})',
-                            ),
-                          ),
-                        ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          ...lines.map((Line line) {
-            final int capacity = linesProvider.lineCapacity(line.type);
-            final String title = switch (line.type) {
-              LineType.goalkeeper => 'Вратарская пара ${line.lineNumber}',
-              LineType.forward => 'Звено нападения ${line.lineNumber}',
-              LineType.defense => 'Пара защиты ${line.lineNumber}',
-            };
-            final List<String> validIds = line.playerIds
-                .where((String id) {
-                  final Player? player = team.playerById(id);
-                  if (player == null) {
-                    return false;
-                  }
-                  return linesProvider.isPositionAllowedForLine(
-                    playerPosition: player.position,
-                    lineType: line.type,
-                  );
-                })
-                .toList(growable: false);
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-              child: SecondaryCardSurface(
-                padding: EdgeInsets.zero,
-                child: DragTarget<String>(
-                onWillAcceptWithDetails: (DragTargetDetails<String> details) {
-                  final Player? player = team.playerById(details.data);
-                  if (player == null) {
-                    return false;
-                  }
-                  final bool positionAllowed = linesProvider.isPositionAllowedForLine(
-                    playerPosition: player.position,
-                    lineType: line.type,
-                  );
-                  if (!positionAllowed) {
-                    return false;
-                  }
-                  return linesProvider.canAddPlayerToLine(
-                    line: line,
-                    playerId: player.id,
-                  );
-                },
-                onAcceptWithDetails: isGuest
-                    ? null
-                    : (DragTargetDetails<String> details) async {
-                        final Player? player = team.playerById(details.data);
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: AppSpacing.s12),
+                ...lines.map((Line line) {
+                  final int capacity = linesProvider.lineCapacity(line.type);
+                  final String title = switch (line.type) {
+                    LineType.goalkeeper => 'Вратарская пара ${line.lineNumber}',
+                    LineType.forward => 'Звено нападения ${line.lineNumber}',
+                    LineType.defense => 'Пара защиты ${line.lineNumber}',
+                  };
+                  final List<String> validIds = line.playerIds
+                      .where((String id) {
+                        final Player? player = team.playerById(id);
                         if (player == null) {
-                          return;
+                          return false;
                         }
-                        final bool isAllowed = linesProvider.isPositionAllowedForLine(
+                        return linesProvider.isPositionAllowedForLine(
                           playerPosition: player.position,
                           lineType: line.type,
                         );
-                        if (!isAllowed) {
-                          if (context.mounted) {
-                            showAppSnackBar(
-                              context,
-                              switch (line.type) {
-                                LineType.goalkeeper =>
-                                  'В эту линию можно добавить только вратарей',
-                                LineType.forward =>
-                                  'В звено нападения можно добавить только нападающих',
-                                LineType.defense =>
-                                  'В пару защиты можно добавить только защитников',
-                              },
-                              error: true,
-                            );
+                      })
+                      .toList(growable: false);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+                    child: SecondaryCardSurface(
+                      padding: EdgeInsets.zero,
+                      child: DragTarget<String>(
+                        onWillAcceptWithDetails: (DragTargetDetails<String> details) {
+                          final Player? player = team.playerById(details.data);
+                          if (player == null) {
+                            return false;
                           }
-                          return;
-                        }
-                        if (!linesProvider.canAddPlayerToLine(
-                          line: line,
-                          playerId: player.id,
-                        )) {
-                          if (context.mounted) {
-                            showAppSnackBar(
-                              context,
-                              'Линия заполнена: максимум $capacity игроков',
-                              error: true,
-                            );
+                          final bool positionAllowed = linesProvider.isPositionAllowedForLine(
+                            playerPosition: player.position,
+                            lineType: line.type,
+                          );
+                          if (!positionAllowed) {
+                            return false;
                           }
-                          return;
-                        }
-                        await linesProvider.movePlayer(
-                          playerId: details.data,
-                          targetLineId: line.id,
-                          playerPosition: player.position,
-                        );
-                      },
-                builder: (context, _, __) => ListTile(
-                  title: Text('$title (${validIds.length}/$capacity)'),
-                  subtitle: validIds.isEmpty
-                      ? const Text('-')
-                      : Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: validIds
-                              .map(
-                                (String id) => InputChip(
-                                  label: Text(team.playerById(id)!.fullName),
-                                  onDeleted: isGuest ? null : () {
-                                    linesProvider.removePlayerFromLine(
-                                      playerId: id,
-                                      lineId: line.id,
+                          return linesProvider.canAddPlayerToLine(
+                            line: line,
+                            playerId: player.id,
+                          );
+                        },
+                        onAcceptWithDetails: isGuest
+                            ? null
+                            : (DragTargetDetails<String> details) async {
+                                final Player? player = team.playerById(details.data);
+                                if (player == null) {
+                                  return;
+                                }
+                                final bool isAllowed = linesProvider.isPositionAllowedForLine(
+                                  playerPosition: player.position,
+                                  lineType: line.type,
+                                );
+                                if (!isAllowed) {
+                                  if (context.mounted) {
+                                    showAppSnackBar(
+                                      context,
+                                      switch (line.type) {
+                                        LineType.goalkeeper =>
+                                          'В эту линию можно добавить только вратарей',
+                                        LineType.forward =>
+                                          'В звено нападения можно добавить только нападающих',
+                                        LineType.defense =>
+                                          'В пару защиты можно добавить только защитников',
+                                      },
+                                      error: true,
                                     );
-                                  },
+                                  }
+                                  return;
+                                }
+                                if (!linesProvider.canAddPlayerToLine(
+                                  line: line,
+                                  playerId: player.id,
+                                )) {
+                                  if (context.mounted) {
+                                    showAppSnackBar(
+                                      context,
+                                      'Линия заполнена: максимум $capacity игроков',
+                                      error: true,
+                                    );
+                                  }
+                                  return;
+                                }
+                                await linesProvider.movePlayer(
+                                  playerId: details.data,
+                                  targetLineId: line.id,
+                                  playerPosition: player.position,
+                                );
+                              },
+                        builder: (context, _, __) => ListTile(
+                          title: Text('$title (${validIds.length}/$capacity)'),
+                          subtitle: validIds.isEmpty
+                              ? const Text('-')
+                              : Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: validIds
+                                      .map(
+                                        (String id) => InputChip(
+                                          label: Text(team.playerById(id)!.fullName),
+                                          onDeleted: isGuest ? null : () {
+                                            linesProvider.removePlayerFromLine(
+                                              playerId: id,
+                                              lineId: line.id,
+                                            );
+                                          },
+                                        ),
+                                      )
+                                      .toList(growable: false),
                                 ),
-                              )
-                              .toList(growable: false),
                         ),
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: AppSpacing.s8),
+                OutlinedButton.icon(
+                  onPressed: isGuest ? null : () async {
+                    await linesProvider.clearAllLines();
+                    if (context.mounted) {
+                      showAppSnackBar(context, 'Все звенья очищены', success: true);
+                    }
+                  },
+                  icon: const Icon(Icons.clear_all),
+                  label: const Text('Очистить все звенья'),
                 ),
-              ),
-            ),
-            );
-          }),
-          const SizedBox(height: AppSpacing.s8),
-          OutlinedButton.icon(
-            onPressed: isGuest ? null : () async {
-              await linesProvider.clearAllLines();
-              if (context.mounted) {
-                showAppSnackBar(context, 'Все звенья очищены', success: true);
-              }
-            },
-            icon: const Icon(Icons.clear_all),
-            label: const Text('Очистить все звенья'),
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          ElevatedButton(
-            onPressed: isGuest ? null : () async {
-              await linesProvider.saveLines();
-              if (context.mounted) {
-                showAppSnackBar(context, 'Состав звеньев сохранён', success: true);
-              }
-            },
-            child: const Text('Сохранить звенья'),
-          ),
+                const SizedBox(height: AppSpacing.s8),
+                ElevatedButton(
+                  onPressed: isGuest ? null : () async {
+                    await linesProvider.saveLines();
+                    if (context.mounted) {
+                      showAppSnackBar(context, 'Состав звеньев сохранён', success: true);
+                    }
+                  },
+                  child: const Text('Сохранить звенья'),
+                ),
               ],
             ),
           ),
@@ -952,6 +952,10 @@ class _ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final bool isGuest = auth.isGuest;
+    final bool isAdmin = auth.isAdmin;
+    final bool isSystemAdmin = auth.isSystemAdmin(auth.currentUser?.id ?? '');
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Профиль'),
@@ -960,153 +964,198 @@ class _ProfilePage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (auth.isGuest) const GuestModeBanner(),
+          if (isGuest) const GuestModeBanner(),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.s16),
               children: <Widget>[
-          Text(
-            'Email: ${auth.currentUser?.email ?? '-'}',
-            style: AppTextStyles.bodyEmphasis(context),
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          Text(
-            'Роль: ${auth.currentUser?.role.name ?? '-'}',
-            style: AppTextStyles.bodySmallMuted(context),
-          ),
-          const SizedBox(height: AppSpacing.s24),
-          if (!auth.isSystemAdmin(auth.currentUser?.id ?? '')) ...<Widget>[
-            ElevatedButton(
-              onPressed: () async {
-                await auth.deleteCurrentAccount();
-              },
-              child: const Text('Удалить аккаунт'),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
-          ElevatedButton(
-            onPressed: () async {
-              await context.read<AuthProvider>().signOut();
-            },
-            child: const Text('Выйти из аккаунта'),
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          if (!auth.isGuest) ...<Widget>[
-            OutlinedButton.icon(
-              onPressed: () async {
-                final String path = await context.read<TeamProvider>().exportFullAppDataJson();
-                if (context.mounted) {
-                  showAppSnackBar(
-                    context,
-                    'Полный бэкап данных сохранён: $path',
-                    success: true,
-                  );
-                }
-              },
-              icon: const Icon(Icons.download_outlined),
-              label: const Text('Экспорт полных данных (JSON)'),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
-          if (!auth.isGuest) ...<Widget>[
-            OutlinedButton.icon(
-              onPressed: () async {
-                final bool? ok = await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext ctx) => AlertDialog(
-                    title: const Text('Импорт из JSON'),
-                    content: const Text(
-                      'Файл должен быть в том же формате, что экспорт приложения (users, players, lines, notes). '
-                      'Текущие данные на устройстве будут полностью заменены содержимым файла.',
+                Text(
+                  'Email: ${auth.currentUser?.email ?? '-'}',
+                  style: AppTextStyles.bodyEmphasis(context),
+                ),
+                const SizedBox(height: AppSpacing.s8),
+                Text(
+                  'Роль: ${_getRoleName(auth.currentUser?.role)}',
+                  style: AppTextStyles.bodySmallMuted(context),
+                ),
+                const SizedBox(height: AppSpacing.s24),
+                // Кнопка удаления аккаунта (свой профиль)
+                // Не показываем для гостей и для системного администратора
+                if (!isGuest && !isSystemAdmin) ...<Widget>[
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
                     ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                        child: const Text('Отмена'),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        child: const Text('Выбрать файл'),
-                      ),
-                    ],
+                    onPressed: () async {
+                      final bool? confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Подтверждение удаления'),
+                          content: const Text(
+                            'Вы уверены, что хотите удалить свой аккаунт? '
+                            'Все данные, связанные с вашим аккаунтом, будут удалены. Это действие необратимо.',
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: const Text('Отмена'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.accent,
+                              ),
+                              child: const Text('Удалить'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        await auth.deleteCurrentAccount();
+                        if (context.mounted) {
+                          showAppSnackBar(context, 'Аккаунт удалён', success: true);
+                        }
+                      }
+                    },
+                    child: const Text('Удалить аккаунт'),
                   ),
-                );
-                if (ok != true || !context.mounted) {
-                  return;
-                }
-                final FilePickerResult? pick = await FilePicker.platform.pickFiles(
-                  type: FileType.custom,
-                  allowedExtensions: <String>['json'],
-                  withData: true,
-                );
-                if (pick == null || pick.files.isEmpty || !context.mounted) {
-                  return;
-                }
-                final PlatformFile file = pick.files.single;
-                final String? content = file.bytes != null
-                    ? utf8.decode(file.bytes!, allowMalformed: false)
-                    : (file.path != null ? await File(file.path!).readAsString() : null);
-                if (content == null || content.isEmpty) {
-                  showAppDialog(
-                    context: context,
-                    title: 'Ошибка импорта',
-                    message: 'Не удалось прочитать файл',
-                    isError: true,
-                  );
-                  return;
-                }
-                final TeamProvider team = context.read<TeamProvider>();
-                final AuthProvider authProvider = context.read<AuthProvider>();
-                final String? importError = await team.importBackupJson(content);
-                if (!context.mounted) {
-                  return;
-                }
-                if (importError != null) {
-                  showAppDialog(
-                    context: context,
-                    title: 'Ошибка импорта',
-                    message: importError,
-                    isError: true,
-                  );
-                  return;
-                }
-                authProvider.invalidateSystemAccountsCache();
-                await authProvider.ensureSystemAccounts();
-                await authProvider.reconcileSessionAfterDataChange();
-                await context.read<LinesProvider>().loadLines();
-                if (!context.mounted) {
-                  return;
-                }
-                if (!context.read<AuthProvider>().isAuthorized) {
-                  showAppSnackBar(
-                    context,
-                    'Данные импортированы. Текущий пользователь отсутствует в файле — войдите снова.',
-                    success: true,
-                  );
-                } else {
-                  showAppSnackBar(context, 'Данные успешно импортированы из JSON.', success: true);
-                }
-              },
-              icon: const Icon(Icons.upload_file_outlined),
-              label: const Text('Импорт из JSON (бэкап)'),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-          ],
-          if (auth.isAdmin) ...<Widget>[
-            const SizedBox(height: AppSpacing.s24),
-            Text(
-              'Управление пользователями',
-              style: AppTextStyles.titleSection(context),
-            ),
-            const SizedBox(height: AppSpacing.s8),
-            const _UsersAdminPanel(),
-          ],
+                  const SizedBox(height: AppSpacing.s8),
+                ],
+                ElevatedButton(
+                  onPressed: () async {
+                    await context.read<AuthProvider>().signOut();
+                  },
+                  child: const Text('Выйти из аккаунта'),
+                ),
+                const SizedBox(height: AppSpacing.s8),
+                if (!isGuest) ...<Widget>[
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final String path = await context.read<TeamProvider>().exportFullAppDataJson();
+                      if (context.mounted) {
+                        showAppSnackBar(
+                          context,
+                          'Полный бэкап данных сохранён: $path',
+                          success: true,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.download_outlined),
+                    label: const Text('Экспорт полных данных (JSON)'),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                ],
+                if (!isGuest) ...<Widget>[
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final bool? ok = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext ctx) => AlertDialog(
+                          title: const Text('Импорт из JSON'),
+                          content: const Text(
+                            'Файл должен быть в том же формате, что экспорт приложения (users, players, lines, notes). '
+                            'Текущие данные на устройстве будут полностью заменены содержимым файла.',
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: const Text('Отмена'),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: const Text('Выбрать файл'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (ok != true || !context.mounted) {
+                        return;
+                      }
+                      final FilePickerResult? pick = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: <String>['json'],
+                        withData: true,
+                      );
+                      if (pick == null || pick.files.isEmpty || !context.mounted) {
+                        return;
+                      }
+                      final PlatformFile file = pick.files.single;
+                      final String? content = file.bytes != null
+                          ? utf8.decode(file.bytes!, allowMalformed: false)
+                          : (file.path != null ? await File(file.path!).readAsString() : null);
+                      if (content == null || content.isEmpty) {
+                        showAppDialog(
+                          context: context,
+                          title: 'Ошибка импорта',
+                          message: 'Не удалось прочитать файл',
+                          isError: true,
+                        );
+                        return;
+                      }
+                      final TeamProvider team = context.read<TeamProvider>();
+                      final AuthProvider authProvider = context.read<AuthProvider>();
+                      final String? importError = await team.importBackupJson(content);
+                      if (!context.mounted) {
+                        return;
+                      }
+                      if (importError != null) {
+                        showAppDialog(
+                          context: context,
+                          title: 'Ошибка импорта',
+                          message: importError,
+                          isError: true,
+                        );
+                        return;
+                      }
+                      authProvider.invalidateSystemAccountsCache();
+                      await authProvider.ensureSystemAccounts();
+                      await authProvider.reconcileSessionAfterDataChange();
+                      await context.read<LinesProvider>().loadLines();
+                      if (!context.mounted) {
+                        return;
+                      }
+                      if (!context.read<AuthProvider>().isAuthorized) {
+                        showAppSnackBar(
+                          context,
+                          'Данные импортированы. Текущий пользователь отсутствует в файле — войдите снова.',
+                          success: true,
+                        );
+                      } else {
+                        showAppSnackBar(context, 'Данные успешно импортированы из JSON.', success: true);
+                      }
+                    },
+                    icon: const Icon(Icons.upload_file_outlined),
+                    label: const Text('Импорт из JSON (бэкап)'),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                ],
+                if (isAdmin && !isGuest) ...<Widget>[
+                  const SizedBox(height: AppSpacing.s24),
+                  Text(
+                    'Управление пользователями',
+                    style: AppTextStyles.titleSection(context),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  const _UsersAdminPanel(),
+                ],
               ],
             ),
           ),
         ],
       ),
     );
+  }
+  
+  String _getRoleName(UserRole? role) {
+    if (role == null) return '-';
+    switch (role) {
+      case UserRole.admin:
+        return 'Администратор';
+      case UserRole.coach:
+        return 'Тренер';
+      case UserRole.guest:
+        return 'Гость';
+    }
   }
 }
 
@@ -1162,9 +1211,31 @@ class _PlayerDetailsScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () async {
-                await team.deletePlayer(player.id);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
+                final bool? confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Подтверждение удаления'),
+                    content: Text('Вы уверены, что хотите удалить игрока ${player.fullName}?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Отмена'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accent,
+                        ),
+                        child: const Text('Удалить'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await team.deletePlayer(player.id);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 }
               },
             ),
@@ -1850,94 +1921,162 @@ class _LegendDot extends StatelessWidget {
   }
 }
 
-class _UsersAdminPanel extends StatelessWidget {
+// ИСПРАВЛЕННАЯ АДМИН-ПАНЕЛЬ УПРАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯМИ
+class _UsersAdminPanel extends StatefulWidget {
   const _UsersAdminPanel();
+
+  @override
+  State<_UsersAdminPanel> createState() => _UsersAdminPanelState();
+}
+
+class _UsersAdminPanelState extends State<_UsersAdminPanel> {
+  int _refreshCounter = 0;
+
+  void _refreshUsersList() {
+    setState(() {
+      _refreshCounter++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final AuthProvider auth = context.read<AuthProvider>();
+    final String currentUserId = auth.currentUser?.id ?? '';
+
     return FutureBuilder<List<User>>(
+      key: ValueKey(_refreshCounter),
       future: auth.allUsers(),
       builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+
+        if (!snapshot.hasData) {
+          return const Center(child: Text('Не удалось загрузить список пользователей'));
+        }
+
         final List<User> users = snapshot.data!;
+
+        if (users.isEmpty) {
+          return const Center(child: Text('Нет зарегистрированных пользователей'));
+        }
+
+        // Фильтруем пользователей, исключая текущего (своего)
+        final List<User> otherUsers = users.where((user) => user.id != currentUserId).toList();
+
+        if (otherUsers.isEmpty) {
+          return const Center(child: Text('Нет других пользователей для управления'));
+        }
+
         return Column(
-          children: users.map((User user) {
+          children: otherUsers.map((User user) {
             return SecondaryCardSurface(
               padding: EdgeInsets.zero,
               child: ListTile(
                 title: Text(user.email, style: AppTextStyles.bodyEmphasis(context)),
-                subtitle: Text(user.role.name, style: AppTextStyles.bodySmallMuted(context)),
+                subtitle: Text(_getRoleName(user.role), style: AppTextStyles.bodySmallMuted(context)),
                 trailing: auth.isSystemAdmin(user.id)
                     ? Chip(
                         label: const Text('Системный администратор'),
                         avatar: const Icon(Icons.shield, size: 18),
                       )
-                    : user.role == UserRole.admin
-                        ? Chip(
-                            label: const Text('Администратор'),
-                            avatar: const Icon(Icons.admin_panel_settings, size: 18),
-                          )
-                        : Wrap(
-                            spacing: AppSpacing.s8,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: <Widget>[
-                              DropdownButton<UserRole>(
-                                value: user.role,
-                                items: UserRole.values
-                                    .map(
-                                      (UserRole role) => DropdownMenuItem<UserRole>(
-                                        value: role,
-                                        child: Text(role.name),
-                                      ),
-                                    )
-                                    .toList(growable: false),
-                                onChanged: (UserRole? value) async {
-                                  if (value == null) {
-                                    return;
-                                  }
-                                  final String? error = await context.read<AuthProvider>().updateUserRole(
-                                    userId: user.id,
-                                    role: value,
-                                  );
-                                  if (context.mounted && error != null) {
-                                    showAppDialog(
-                                      context: context,
-                                      title: 'Ошибка изменения роли',
-                                      message: error,
-                                      isError: true,
-                                    );
-                                  }
-                                },
-                              ),
-                              IconButton(
-                                style: IconButton.styleFrom(
-                                  minimumSize: const Size(48, 48),
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                onPressed: () async {
-                                  final String? error = await context.read<AuthProvider>().deleteUserById(
-                                    user.id,
-                                  );
-                                  if (context.mounted) {
-                                    if (error != null) {
-                                      showAppDialog(
-                                        context: context,
-                                        title: 'Ошибка удаления',
-                                        message: error,
-                                        isError: true,
-                                      );
-                                    } else {
-                                      showAppSnackBar(context, 'Пользователь удалён', success: true);
-                                    }
-                                  }
-                                },
-                                icon: const Icon(Icons.delete_outline),
-                              ),
-                            ],
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Выпадающий список для смены роли
+                          DropdownButton<UserRole>(
+                            value: user.role,
+                            items: UserRole.values
+                                .where((role) => role != UserRole.guest)
+                                .map(
+                                  (UserRole role) => DropdownMenuItem<UserRole>(
+                                    value: role,
+                                    child: Text(_getRoleName(role)),
+                                  ),
+                                )
+                                .toList(growable: false),
+                            onChanged: (UserRole? newRole) async {
+                              if (newRole == null) return;
+
+                              final String? error = await auth.updateUserRole(
+                                userId: user.id,
+                                role: newRole,
+                              );
+
+                              if (!context.mounted) return;
+
+                              if (error != null) {
+                                showAppDialog(
+                                  context: context,
+                                  title: 'Ошибка изменения роли',
+                                  message: error,
+                                  isError: true,
+                                );
+                              } else {
+                                _refreshUsersList();
+                                showAppSnackBar(
+                                  context,
+                                  'Роль пользователя изменена',
+                                  success: true,
+                                );
+                              }
+                            },
                           ),
+                          const SizedBox(width: 8),
+                          // Кнопка удаления пользователя
+                          IconButton(
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () async {
+                              final bool? confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Подтверждение удаления'),
+                                  content: Text('Вы уверены, что хотите удалить пользователя ${user.email}?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(ctx).pop(false),
+                                      child: const Text('Отмена'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.of(ctx).pop(true),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.accent,
+                                      ),
+                                      child: const Text('Удалить'),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirm != true) return;
+
+                              final String? error = await auth.deleteUserById(user.id);
+
+                              if (!context.mounted) return;
+
+                              if (error != null) {
+                                showAppDialog(
+                                  context: context,
+                                  title: 'Ошибка удаления',
+                                  message: error,
+                                  isError: true,
+                                );
+                              } else {
+                                _refreshUsersList();
+                                showAppSnackBar(
+                                  context,
+                                  'Пользователь удалён',
+                                  success: true,
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.delete_outline),
+                          ),
+                        ],
+                      ),
               ),
             );
           }).toList(growable: false),
@@ -1945,5 +2084,15 @@ class _UsersAdminPanel extends StatelessWidget {
       },
     );
   }
-}
 
+  String _getRoleName(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return 'Администратор';
+      case UserRole.coach:
+        return 'Тренер';
+      case UserRole.guest:
+        return 'Гость';
+    }
+  }
+}

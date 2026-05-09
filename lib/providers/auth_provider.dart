@@ -337,11 +337,18 @@ class AuthProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Удаление СВОЕГО аккаунта (кнопка «Удалить аккаунт» в профиле)
   Future<void> deleteCurrentAccount() async {
     final User? user = _currentUser;
     if (user == null) {
       return;
     }
+    
+    // Системный администратор не может удалить свой аккаунт через эту кнопку
+    if (isSystemAdmin(user.id)) {
+      return;
+    }
+    
     final AppData appData = await _storageService.loadAppData();
     final List<User> users = appData.users
         .where((User u) => u.id != user.id)
@@ -359,20 +366,31 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// ИЗМЕНЕНИЕ РОЛИ ПОЛЬЗОВАТЕЛЯ (для админ-панели)
+  /// Нельзя изменить: системного администратора, а также СВОЮ собственную роль
   Future<String?> updateUserRole({
     required String userId,
     required UserRole role,
   }) async {
+    // Защита системного администратора
     if (isSystemAdmin(userId)) {
       return 'Нельзя изменить роль системного администратора';
     }
+
+    // Запрет на изменение СВОЕЙ собственной роли (через админ-панель)
+    if (_currentUser != null && _currentUser!.id == userId) {
+      return 'Нельзя изменить свою собственную роль';
+    }
+
     final AppData appData = await _storageService.loadAppData();
     final int index = appData.users.indexWhere((User user) => user.id == userId);
     if (index == -1) {
       return 'Пользователь не найден';
     }
+
     final List<User> users = List<User>.from(appData.users);
     users[index] = users[index].copyWith(role: role);
+
     await _storageService.saveAppData(
       AppData(
         users: users,
@@ -381,32 +399,41 @@ class AuthProvider extends ChangeNotifier {
         notes: appData.notes,
       ),
     );
-    if (_currentUser?.id == userId) {
-      _currentUser = _currentUser?.copyWith(role: role);
-      notifyListeners();
-    }
+
+    notifyListeners();
     return null;
   }
 
+  /// УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (для админ-панели)
+  /// Нельзя удалить: системного администратора, а также СЕБЯ (свой аккаунт удаляется только через deleteCurrentAccount)
   Future<String?> deleteUserById(String userId) async {
     final User? currentUser = _currentUser;
+
+    // Проверка прав доступа
     if (currentUser == null || !isAdmin) {
       return 'Недостаточно прав';
     }
+
+    // Защита системного администратора от удаления
     if (isSystemAdmin(userId)) {
       return 'Нельзя удалить системного администратора';
     }
+
+    // Запрет на удаление САМОГО СЕБЯ в админ-панели
     if (currentUser.id == userId) {
-      return 'Нельзя удалить текущего администратора';
+      return 'Нельзя удалить свой аккаунт через админ-панель. Используйте кнопку "Удалить аккаунт" в профиле.';
     }
+
     final AppData appData = await _storageService.loadAppData();
     final bool exists = appData.users.any((User user) => user.id == userId);
     if (!exists) {
       return 'Пользователь не найден';
     }
+
     final List<User> users = appData.users
         .where((User user) => user.id != userId)
         .toList(growable: false);
+
     await _storageService.saveAppData(
       AppData(
         users: users,
@@ -415,6 +442,7 @@ class AuthProvider extends ChangeNotifier {
         notes: appData.notes,
       ),
     );
+
     notifyListeners();
     return null;
   }
